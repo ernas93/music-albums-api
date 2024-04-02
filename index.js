@@ -2,6 +2,7 @@ const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 const Models = require('./models.js');
+const { check, validationResult } = require('express-validator');
 const app = express();
 const port = 3000;
 require('dotenv').config();
@@ -25,16 +26,60 @@ app.get('/albums', (req, res) => {
 });
 
 // CREATE adds a new album to the library
-app.post('/album', (req, res) => {
-  let newAlbum = req.body;
+app.post(
+  '/album',
+  [
+    check('album_name', 'Album Name is required').notEmpty(),
+    check('artist_name', 'Artist Name is required').notEmpty(),
+    check('release_date', 'Release Date is required').notEmpty(),
+  ],
+  (req, res) => {
+    let errors = validationResult(req);
 
-  if (!newAlbum.name) {
-    const message = 'Missing name in request body.';
-    res.status(400).send(message);
-  } else {
-    newAlbum.id = uuid.v4();
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    Albums.findOne({
+      AlbumName: req.body.album_name,
+      ArtistName: req.body.artist_name,
+    })
+      .then((album) => {
+        if (album) {
+          return res
+            .status(400)
+            .send(
+              'Album ' +
+                req.body.album_name +
+                ' by ' +
+                req.body.artist_name +
+                ' already exists.'
+            );
+        } else {
+          Albums.create({
+            AlbumName: req.body.album_name,
+            ArtistName: req.body.artist_name,
+            ReleaseDate: req.body.release_date,
+          })
+            .then((album) => {
+              if (album) {
+                res.status(200).json(album);
+              } else {
+                res.status(400).send('Album not defined');
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+              res.status(500).send('Error ' + err);
+            });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error ' + err);
+      });
   }
-});
+);
 
 // UPDATE updates existing albums
 app.put('/albums/:albumname', (req, res) => {});
