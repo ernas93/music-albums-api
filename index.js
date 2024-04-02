@@ -82,7 +82,50 @@ app.post(
 );
 
 // UPDATE updates existing albums
-app.put('/albums/:albumname', (req, res) => {});
+app.put(
+  '/albums/:id',
+  [
+    check('album_name', 'Album Name is required').notEmpty(),
+    check('artist_name', 'Artist Name is required').notEmpty(),
+    check('release_date', 'Release Date is required').notEmpty(),
+  ],
+  (req, res) => {
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    Albums.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          AlbumName: req.body.album_name,
+          ArtistName: req.body.artist_name,
+          ReleaseDate: req.body.release_date,
+          ImagePath: req.body.image_path,
+        },
+      },
+      { new: true }
+    )
+      .then((updatedAlbum) => {
+        if (!updatedAlbum) {
+          res.status(400).send(req.params.id + ' was not found.');
+        } else {
+          res.status(200).json(updatedAlbum);
+        }
+      })
+      .catch((err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send('Error ' + err);
+        }
+      });
+  }
+);
+
+// CREATE rating for album
+app.post('/albums/:id/rating', (req, res) => {});
 
 // app.delete();
 
