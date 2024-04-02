@@ -1,55 +1,43 @@
 const cors = require('cors');
 const express = require('express');
+const mongoose = require('mongoose');
+const Models = require('./models.js');
 const app = express();
 const port = 3000;
+require('dotenv').config();
+
+const Albums = Models.Album;
 
 app.use(cors());
 
-const mockAlbum = {
-  music_album: {
-    id: '1234',
-    name_artist: 'Dubioza Kolektiv',
-    name_album: 'Kazu',
-    release_date: '',
-    image_url: '',
-    owner_id: 'userid',
-    ratings: [
-      {
-        id: 'abcd',
-        owner_id: 'userid',
-        rating: 3,
-      },
-      {
-        id: 'abcde',
-        owner_id: 'userid',
-        rating: 5,
-      },
-      {
-        id: 'abcdf',
-        owner_id: 'userid',
-        rating: 5,
-      },
-      {
-        id: 'abcdg',
-        owner_id: 'userid',
-        rating: 5,
-      },
-    ],
-  },
-};
+app.use(express.json());
+
+mongoose.connect(process.env.CONNECTION_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // READ shows music albums and their details
 app.get('/albums', (req, res) => {
-  res.status(200).json(mockAlbum);
+  Albums.find().then((albums) => {
+    res.status(200).json(albums);
+  });
 });
 
-// // CREATE adds a new album to the library
-// app.post('/album', (req, res) => {
-//     req.
-// });
+// CREATE adds a new album to the library
+app.post('/album', (req, res) => {
+  let newAlbum = req.body;
 
-// // UPDATE updates existing albums
-// app.put();
+  if (!newAlbum.name) {
+    const message = 'Missing name in request body.';
+    res.status(400).send(message);
+  } else {
+    newAlbum.id = uuid.v4();
+  }
+});
+
+// UPDATE updates existing albums
+app.put('/albums/:albumname', (req, res) => {});
 
 // app.delete();
 
