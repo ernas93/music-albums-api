@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const ratingSchema = mongoose.Schema({
   Rating: { type: Number, min: 1, max: 5, required: true },
-  UserId: { type: String, required: true, unique: true },
+  //UserId: { type: String, required: true, unique: true },
 });
 
 const albumSchema = mongoose.Schema({

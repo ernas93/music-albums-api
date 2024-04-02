@@ -125,7 +125,39 @@ app.put(
 );
 
 // CREATE rating for album
-app.post('/albums/:id/rating', (req, res) => {});
+app.post(
+  '/albums/:id/rating',
+  [
+    check('rating', 'Rating is required').notEmpty(),
+    check('rating', 'Rating must be between 1 and 5').isInt({ min: 1, max: 5 }),
+  ],
+  (req, res) => {
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    Albums.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: {
+          Ratings: { Rating: req.body.rating },
+        },
+      },
+      { new: true }
+    )
+      .then((album) => {
+        if (album) {
+          return res.status(200).json(album);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        return res.send(500).send('Error ' + err);
+      });
+  }
+);
 
 // app.delete();
 
