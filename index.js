@@ -159,7 +159,35 @@ app.post(
   }
 );
 
-// app.delete();
+app.delete('/albums/:id', (req, res) => {
+  Albums.findById(req.params.id).then((album) => {
+    if (!album) {
+      return res.status(404).send('Album not found.');
+    }
+
+    let sumRating = 0;
+
+    album.Ratings.forEach((rating) => {
+      sumRating += rating.Rating;
+    });
+
+    const ratingCount = album.Ratings.length;
+    const averageRating = sumRating / album.Ratings.length;
+
+    if (averageRating > 4 && ratingCount > 10) {
+      return res.status(405).send('Album is not allowed to be deleted.');
+    } else {
+      Albums.findByIdAndDelete(req.params.id)
+        .then(() => {
+          return res.status(200).send('Successfully deleted.');
+        })
+        .catch((err) => {
+          console.error(err);
+          return res.status(500).send('Error: ' + err);
+        });
+    }
+  });
+});
 
 app.listen(port, () => {
   console.log(`Listening on port: ${port}`);
