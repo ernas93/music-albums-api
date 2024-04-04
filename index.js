@@ -32,6 +32,7 @@ app.post(
     check('album_name', 'Album Name is required').notEmpty(),
     check('artist_name', 'Artist Name is required').notEmpty(),
     check('release_date', 'Release Date is required').notEmpty(),
+    check('image_url', 'Image must be a string').optional().isString(),
   ],
   (req, res) => {
     let errors = validationResult(req);
@@ -60,6 +61,7 @@ app.post(
             AlbumName: req.body.album_name,
             ArtistName: req.body.artist_name,
             ReleaseDate: req.body.release_date,
+            ImagePath: req.body.image_url || '',
           })
             .then((album) => {
               if (album) {
@@ -88,6 +90,7 @@ app.put(
     check('album_name', 'Album Name is required').notEmpty(),
     check('artist_name', 'Artist Name is required').notEmpty(),
     check('release_date', 'Release Date is required').notEmpty(),
+    check('image_url', 'Image must be a string').optional().isString(),
   ],
   (req, res) => {
     let errors = validationResult(req);
