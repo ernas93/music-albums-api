@@ -162,6 +162,7 @@ app.post(
   }
 );
 
+// DELETE an album from the database
 app.delete('/albums/:id', (req, res) => {
   Albums.findById(req.params.id).then((album) => {
     if (!album) {
